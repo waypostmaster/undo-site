@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="UNDO 1.0.0: the complete engineering deliverable for a command-line program whose sole purpose is to undo the effect of having been run.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:,">
+<title>UNDO 1.0.0 Deliverable</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a controlled engineering document — document-control block, numbered sections, one measured column. */
+:root {
+  --bg: #f6f7f4; --paper: #ffffff; --fg: #1d2229; --muted: #5a6470; --rule: #d6dad3;
+  --accent: #2f5d8a; --accent-ink: #ffffff; --code-bg: #eef1ec; --stamp: #9a3b2e;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15181c; --paper: #1c2026; --fg: #e4e7e2; --muted: #9aa3ad; --rule: #333a42;
+  --accent: #7fa7d1; --accent-ink: #0f1419; --code-bg: #12151a; --stamp: #d97b6a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15181c; --paper: #1c2026; --fg: #e4e7e2; --muted: #9aa3ad; --rule: #333a42;
+  --accent: #7fa7d1; --accent-ink: #0f1419; --code-bg: #12151a; --stamp: #d97b6a; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); line-height: 1.55; font-size: 16px; }
+.wrap { max-width: 46rem; margin: 0 auto; padding-block: 2rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.control { background: var(--paper); border: 1px solid var(--rule); border-top: 4px solid var(--accent); padding: 1.1rem 1.25rem; margin-bottom: 2rem; font-family: var(--mono); font-size: .8rem; }
+.control dl { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; }
+.control dt { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; align-self: baseline; }
+.control dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.stamp { display: inline-block; border: 1.5px solid var(--stamp); color: var(--stamp); padding: .05rem .45rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; font-size: .7rem; transform: rotate(-1.5deg); }
+.note { color: var(--muted); font-size: .85rem; margin: 0 0 2rem; max-width: 40rem; }
+.note a { color: var(--accent); }
+#doc h1 { font-size: 1.9rem; line-height: 1.15; text-wrap: balance; margin: 0 0 .5rem; letter-spacing: -.01em; }
+#doc h2 { font-size: 1.3rem; margin: 2.6rem 0 .8rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); text-wrap: balance; }
+#doc h3 { font-size: 1.05rem; margin: 1.8rem 0 .5rem; text-wrap: balance; }
+#doc h4 { font-size: .95rem; margin: 1.4rem 0 .4rem; font-family: var(--mono); font-weight: 500; }
+#doc p, #doc li { max-width: 42rem; }
+#doc ul, #doc ol { padding-left: 1.3rem; }
+#doc code { font-family: var(--mono); font-size: .86em; background: var(--code-bg); padding: .08em .35em; border-radius: 3px; }
+#doc pre { background: var(--code-bg); border: 1px solid var(--rule); padding: .9rem 1rem; overflow-x: auto; font-size: .8rem; line-height: 1.5; }
+#doc pre code { background: none; padding: 0; font-size: inherit; }
+#doc .tbl { overflow-x: auto; margin: 1rem 0; }
+#doc table { border-collapse: collapse; width: 100%; font-size: .86rem; font-variant-numeric: tabular-nums; }
+#doc th, #doc td { border: 1px solid var(--rule); padding: .45rem .6rem; vertical-align: top; text-align: left; }
+#doc th { background: var(--code-bg); font-weight: 600; }
+#doc blockquote { border-left: 3px solid var(--accent); margin: 1rem 0; padding: .2rem 1rem; color: var(--muted); }
+#doc strong { font-weight: 600; }
+#doc em { font-style: italic; }
+#doc a { color: var(--accent); }
+.toc { background: var(--paper); border: 1px solid var(--rule); padding: 1rem 1.25rem; margin: 0 0 1.5rem; font-size: .9rem; }
+.toc h2 { margin: 0 0 .5rem; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); border: 0; padding: 0; }
+.toc ol { margin: 0; padding-left: 1.2rem; columns: 2; column-gap: 2rem; }
+.toc li { break-inside: avoid; margin: .15rem 0; }
+.toc a { color: var(--fg); text-decoration: none; }
+.toc a:hover, .toc a:focus-visible { text-decoration: underline; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { .toc ol { columns: 1; } .control dl { grid-template-columns: 1fr; gap: .1rem; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="control">
+    <dl>
+      <dt>Document</dt><dd>UNDO 1.0.0 — Engineering Deliverable</dd>
+      <dt>Author</dt><dd>Astra, Principal Engineer (gpt-6-astra, reasoning effort xhigh, 27 minutes)</dd>
+      <dt>Commissioned</dt><dd>2026-10-29</dd>
+      <dt>Status</dt><dd><span class="stamp">Accepted for evaluation</span></dd>
+      <dt>Classification</dt><dd>Recreational. Nothing but the brief was sent.</dd>
+    </dl>
+  </div>
+  <p class="note">The brief asked for a command-line program whose sole purpose is to undo the effect of having been run, with the pointlessness "not under discussion". What follows is the deliverable as returned, unedited: nine sections, 775 lines, eight ADRs, a thirteen-row STRIDE table, a working Python implementation that exits 3 on success, and a FAQ in which the question "but why" is answered without conceding anything. The <a href="brief.md">brief</a> is published beside it. Astra later chose this page's domain name, needle.fyi, from a list of candidates on "scope fit, documentation fit and readability", and recorded in a risk register that "a needle can suggest precise repair; readers may infer stronger restoration guarantees than the program provides."</p>
+  <nav class="toc" id="toc" hidden><h2>Contents</h2><ol id="toclist"></ol></nav>
+  <article id="doc"><p class="note">Loading the deliverable…</p></article>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+(function () {
+  var doc = document.getElementById('doc');
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+  fetch('undo-deliverable.md').then(function (r) { return r.text(); }).then(function (md) {
+    marked.setOptions({ gfm: true, breaks: false });
+    doc.innerHTML = marked.parse(md);
+    // wrap tables for horizontal scroll on phones
+    doc.querySelectorAll('table').forEach(function (t) {
+      var w = document.createElement('div'); w.className = 'tbl'; t.parentNode.insertBefore(w, t); w.appendChild(t);
+    });
+    // contents from the h2s
+    var list = document.getElementById('toclist'), seen = {};
+    doc.querySelectorAll('h2').forEach(function (h) {
+      var id = slug(h.textContent); if (seen[id]) id += '-' + (++seen[id]); else seen[id] = 1; h.id = id;
+      var li = document.createElement('li'), a = document.createElement('a'); a.href = '#' + id; a.textContent = h.textContent; li.appendChild(a); list.appendChild(li);
+    });
+    document.getElementById('toc').hidden = list.children.length === 0;
+    if (location.hash) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  }).catch(function (e) { doc.textContent = 'The deliverable could not be loaded: ' + e; });
+})();
+</script>
+
+</body>
+</html>
